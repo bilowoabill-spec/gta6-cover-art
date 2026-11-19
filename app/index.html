@@ -3,103 +3,110 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vice Nights — Cover Art Maker</title>
+<title>Vice Sunset — Cover Art Studio</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls" id="controls">
-    <h1>Vice Nights</h1>
-    <p class="tagline">Turn your photo into a neon sunset poster.</p>
+<header class="topbar">
+  <div>
+    <h1>VICE SUNSET</h1>
+    <p>Cover Art Studio — turn your photo into a GTA 6-style poster</p>
+  </div>
+  <div class="topbar-note">100% on your machine — photos are never uploaded</div>
+</header>
 
-    <fieldset>
-      <legend>Layout</legend>
-      <label><input type="radio" name="layout" value="strip" checked> Sunset Strip</label>
-      <label><input type="radio" name="layout" value="grid"> Neon Grid</label>
-      <label><input type="radio" name="layout" value="hero"> Hero Shot</label>
-    </fieldset>
+<main class="layout">
+  <section class="controls" aria-label="Poster controls">
+    <h2>1 · Photos</h2>
+    <label class="file-btn" for="photoInput">Upload photo(s) from your machine</label>
+    <input id="photoInput" type="file" accept="image/*" multiple hidden>
+    <div class="sample-row">
+      <span>Or try a sample:</span>
+      <button type="button" id="sampleBoulevard" class="chip">Boulevard</button>
+      <button type="button" id="samplePier" class="chip">Pier</button>
+    </div>
+    <div id="photoStrip" class="photo-strip" aria-label="Loaded photos"></div>
+    <p class="hint">Click a thumbnail to put that photo in the selected panel.</p>
 
-    <fieldset>
-      <legend>Colour grade</legend>
-      <div class="grades">
-        <button type="button" data-grade="sunset" class="active">Sunset</button>
-        <button type="button" data-grade="neon">Neon Nights</button>
-        <button type="button" data-grade="midnight">Midnight</button>
-        <button type="button" data-grade="candy">Candy</button>
-      </div>
-    </fieldset>
+    <h2>2 · Layout</h2>
+    <div class="btn-row" id="layoutRow">
+      <button type="button" class="layout-btn active" data-layout="split">Sunset Split</button>
+      <button type="button" class="layout-btn" data-layout="grid">Vice Grid</button>
+      <button type="button" class="layout-btn" data-layout="triptych">Triptych</button>
+    </div>
 
-    <fieldset>
-      <legend>Your photos</legend>
-      <p class="note">Photos stay on your machine — they are read with FileReader and never uploaded.</p>
-      <div class="slot" data-slot="0">
-        <span class="slot-name">Photo A</span>
-        <input type="file" accept="image/*" aria-label="Photo A">
-        <button type="button" data-sample="samples/pier.jpg">Use sample</button>
-        <button type="button" data-clear>Clear</button>
-      </div>
-      <div class="slot" data-slot="1">
-        <span class="slot-name">Photo B</span>
-        <input type="file" accept="image/*" aria-label="Photo B">
-        <button type="button" data-sample="samples/boulevard.jpg">Use sample</button>
-        <button type="button" data-clear>Clear</button>
-      </div>
-      <div class="slot" data-slot="2">
-        <span class="slot-name">Photo C</span>
-        <input type="file" accept="image/*" aria-label="Photo C">
-        <button type="button" data-sample="samples/pier.jpg">Use sample</button>
-        <button type="button" data-clear>Clear</button>
-      </div>
-    </fieldset>
+    <h2>3 · Selected panel</h2>
+    <div class="btn-row" id="panelBtns"></div>
+    <label class="field">Photo in this panel
+      <select id="panelPhoto"></select>
+    </label>
+    <label class="field">Zoom
+      <input id="zoomRange" type="range" min="1" max="2.5" step="0.01" value="1">
+    </label>
+    <label class="field">Move left / right
+      <input id="panXRange" type="range" min="-0.5" max="0.5" step="0.01" value="0">
+    </label>
+    <label class="field">Move up / down
+      <input id="panYRange" type="range" min="-0.5" max="0.5" step="0.01" value="0">
+    </label>
+    <button type="button" id="fillAllBtn" class="wide">Fill every panel with this photo</button>
+    <p class="hint">Tip: drag the photo right on the preview to move it, scroll over it to zoom.</p>
 
-    <fieldset>
-      <legend>Words</legend>
-      <label>Caption <input id="caption" type="text" maxlength="48" value="Sunset Heist"></label>
-      <label>Subtitle <input id="subtitle" type="text" maxlength="60" value="Vice Nights • Est. 2026"></label>
-    </fieldset>
+    <h2>4 · Caption</h2>
+    <label class="field">Caption
+      <input id="captionInput" type="text" value="SUNSET DRIVE" maxlength="28">
+    </label>
+    <label class="field">Subline
+      <input id="sublineInput" type="text" value="NEON NIGHTS" maxlength="32">
+    </label>
+    <label class="field">Caption size
+      <input id="captionSize" type="range" min="0.6" max="1.6" step="0.05" value="1">
+    </label>
+    <div class="btn-row">
+      <button type="button" class="pos-btn active" data-pos="bottom">Caption at bottom</button>
+      <button type="button" class="pos-btn" data-pos="top">Caption at top</button>
+    </div>
+    <label class="field">Caption style
+      <select id="captionStyle">
+        <option value="sunset">Sunset gradient</option>
+        <option value="neon">Neon pink</option>
+        <option value="gold">Gold</option>
+      </select>
+    </label>
 
-    <fieldset>
-      <legend>Selected panel</legend>
-      <p class="note" id="selectedPanel">Panel 1 of 3 (Sunset Strip)</p>
-      <label>Fill with
-        <select id="panelPhoto">
-          <option value="-1">Sunset skyline art</option>
-          <option value="0" selected>Photo A</option>
-          <option value="1">Photo B</option>
-          <option value="2">Photo C</option>
-        </select>
-      </label>
-      <label>Zoom <input id="zoom" type="range" min="1" max="2.5" step="0.01" value="1"></label>
-      <label>Move sideways <input id="offsetX" type="range" min="-0.4" max="0.4" step="0.01" value="0"></label>
-      <label>Move up / down <input id="offsetY" type="range" min="-0.4" max="0.4" step="0.01" value="0"></label>
-    </fieldset>
+    <h2>5 · Colour grade</h2>
+    <label class="field">Grade
+      <select id="gradeSelect">
+        <option value="sunset">Sunset warm</option>
+        <option value="neon">Neon nights</option>
+        <option value="noir">Palm noir</option>
+        <option value="original">Original photo</option>
+      </select>
+    </label>
 
-    <fieldset>
-      <legend>Export PNG</legend>
-      <div class="exports">
-        <button type="button" data-size="1080x1080">1080 x 1080</button>
-        <button type="button" data-size="1080x1350">1080 x 1350</button>
-        <button type="button" data-size="1920x1080">1920 x 1080</button>
-      </div>
-      <button type="button" id="exportAll" class="primary">Export all three sizes</button>
-    </fieldset>
-
-    <p id="status" role="status"></p>
+    <h2>6 · Export</h2>
+    <div class="btn-row" id="sizeRow">
+      <button type="button" class="size-btn active" data-size="1080x1080">1080 × 1080</button>
+      <button type="button" class="size-btn" data-size="1080x1350">1080 × 1350</button>
+      <button type="button" class="size-btn" data-size="1920x1080">1920 × 1080</button>
+    </div>
+    <button type="button" id="exportBtn" class="wide primary">Download PNG</button>
+    <button type="button" id="resetBtn" class="wide">Reset poster</button>
+    <p id="status" class="status" role="status">Load a photo to begin.</p>
   </section>
 
-  <section class="stage">
-    <canvas id="poster" width="1080" height="1350" aria-label="The cover preview"></canvas>
-    <p id="hint">Click a panel to select it, then drag it to move its photo.</p>
-    <div id="lastExport" hidden>
-      <h2>Last export</h2>
-      <img id="exportPreview" alt="The PNG this app just exported">
-    </div>
+  <section class="preview-wrap" aria-label="Poster preview">
+    <canvas id="preview" width="720" height="720"></canvas>
+    <p class="hint">Preview — click a panel to select it, drag to move its photo.</p>
   </section>
 </main>
-<div id="exportedShot" hidden>
-  <img id="exportedImg" alt="The PNG this app exported">
-</div>
-<script type="module" src="./src/main.js"></script>
+
+<footer class="foot">
+  An original design. No Rockstar Games logo, artwork, character or font is used.
+  Display type is Anton (SIL Open Font License), shipped under app/fonts/.
+</footer>
+
+<script src="app.js"></script>
 </body>
 </html>
