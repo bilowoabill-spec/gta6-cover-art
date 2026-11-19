@@ -1,48 +1,39 @@
-// Vice Sunset — the entry program for gta6-cover-art-01 (Node 22, stdlib only).
+// Vice Sunset entry for make.fun bounty gta6-cover-art-01 (Node 22, stdlib only).
 //
-// The app itself is plain static files under app/ (index.html plus its ES
-// modules, styles, the Anton font and sample photos) that any static server
-// can serve offline. This program hands it in: it copies app/ and
-// screenshots/ from this repository into the output directory and writes
-// /output/dossier.json with buildDossier from the kit's vendored library
-// (vendor/makefun-app.ts, unchanged). Outside the grader, the environment
-// variable MAKEFUN_OUTPUT_DIR stands in for /output, so a local check is:
+// The app is plain static files under app/ (index.html plus ES modules, a
+// vendored font and two sample photos; nothing loads over the network), and
+// this program hands it in: it copies app/ and screenshots/ from beside
+// this file into /output and writes /output/dossier.json with the vendored
+// make.fun library, so the judge can read the app and its screenshots.
 //
-//   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
-//
-// Both runs must write identical bytes, so nothing here depends on the
-// clock, on randomness, or on the order the filesystem happens to list
-// files in — buildDossier already walks the trees deterministically.
+// Local check:  mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-// Directory this file lives in: the repository root.
-const repoRoot = fileURLToPath(new URL('.', import.meta.url));
-// The grader gives us /output; local runs use MAKEFUN_OUTPUT_DIR instead.
-const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+const here = fileURLToPath(new URL('.', import.meta.url));
+const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-mkdirSync(outputDir, { recursive: true });
-cpSync(join(repoRoot, 'app'), join(outputDir, 'app'), { recursive: true });
-
-const shotsDir = join(outputDir, 'screenshots');
-mkdirSync(shotsDir, { recursive: true });
-if (existsSync(join(repoRoot, 'screenshots'))) {
-  cpSync(join(repoRoot, 'screenshots'), shotsDir, { recursive: true });
+mkdirSync(out, { recursive: true });
+cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
+mkdirSync(join(out, 'screenshots'), { recursive: true });
+if (existsSync(join(here, 'screenshots'))) {
+  cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
 }
 
-// The caps mirror the scorer's gate: only text_max_bytes changes the
-// dossier bytes; the rest make this program fail exactly where the scorer
-// would refuse the entry (too many screenshots, one too big, app/ too big
-// or too many files, or a path too long).
-const dossier = buildDossier(outputDir, {
-  text_max_bytes: 163840,
-  screenshots: { max: 4, max_bytes: 262144 },
-  app_max_files: 993,
-  app_max_bytes: 50331648,
-  app_path_max_bytes: 1000,
-});
-
-writeFileSync(join(outputDir, 'dossier.json'), dossier);
+// The scorer's caps (gate.json): text_max_bytes shapes the dossier bytes;
+// the rest refuse an entry the scorer would refuse (more than 4 screenshots
+// or one over 256 KiB; more than 993 files in app/ or 48 MiB of app files in
+// all, or a path under app/ over 1000 bytes).
+writeFileSync(
+  join(out, 'dossier.json'),
+  buildDossier(out, {
+    text_max_bytes: 163840,
+    screenshots: { max: 4, max_bytes: 262144 },
+    app_max_files: 993,
+    app_max_bytes: 50331648,
+    app_path_max_bytes: 1000,
+  }),
+);
