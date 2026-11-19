@@ -1,12 +1,153 @@
-html, body { margin: 0; height: 100%; background: #f2f0f4; color: #1d1b22; font: 15px/1.4 system-ui, sans-serif; }
-.app { display: flex; gap: 32px; align-items: center; justify-content: center; height: 100%; padding: 24px; box-sizing: border-box; }
-.controls { display: flex; flex-direction: column; gap: 14px; width: 280px; }
-.controls h1 { margin: 0; font-size: 28px; }
-.controls p { margin: 0; color: #5c5866; }
-label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
-input[type=text] { font: inherit; padding: 8px; border: 1px solid #c9c4d1; border-radius: 6px; }
-button { font: inherit; font-weight: 700; padding: 10px; border: 0; border-radius: 6px; background: #1d1b22; color: #fff; cursor: pointer; }
-canvas { width: min(70vh, 60vw); height: min(70vh, 60vw); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); }
-body.shot-cover .controls { display: none; }
-body.shot-cover .app { padding: 0; }
-body.shot-cover canvas { width: 100vw; height: 100vh; box-shadow: none; }
+/* Vice Nights: a dark neon editor shell around a bright sunset poster. */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./fonts/Anton-Regular.woff2') format('woff2');
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #12081f;
+  color: #f5eefc;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 20px;
+  align-items: start;
+}
+
+.controls h1 {
+  font-family: Anton, 'Arial Narrow', sans-serif;
+  font-size: 42px;
+  letter-spacing: 1px;
+  margin: 0;
+  color: #ffd166;
+  text-transform: uppercase;
+}
+
+.tagline { margin: 4px 0 16px; color: #cdb8e8; }
+
+fieldset {
+  border: 1px solid #3d2457;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 0 0 14px;
+}
+
+legend {
+  font-family: Anton, 'Arial Narrow', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #00e5ff;
+  padding: 0 6px;
+}
+
+fieldset label { display: block; margin: 8px 0; }
+fieldset input[type="text"], fieldset select {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #3d2457;
+  background: #1d0f30;
+  color: #f5eefc;
+  font-size: 15px;
+}
+fieldset input[type="range"] { width: 100%; }
+
+.note { margin: 4px 0 10px; font-size: 13px; color: #cdb8e8; }
+
+.grades, .exports { display: flex; flex-wrap: wrap; gap: 8px; }
+
+button {
+  cursor: pointer;
+  border: 1px solid #3d2457;
+  background: #241338;
+  color: #f5eefc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+button:hover { border-color: #00e5ff; }
+button.active { background: #00e5ff; color: #12081f; border-color: #00e5ff; }
+button.primary {
+  width: 100%;
+  margin-top: 10px;
+  background: #ff2e88;
+  border-color: #ff2e88;
+  font-weight: 700;
+}
+button.primary:hover { background: #ff4d9a; }
+
+.slot {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 6px;
+  align-items: center;
+  margin: 10px 0;
+}
+.slot-name { font-weight: 700; }
+.slot input[type="file"] { grid-column: 2; font-size: 13px; }
+.slot button { grid-column: 2; justify-self: start; padding: 4px 10px; font-size: 13px; }
+.slot button + button { grid-column: 2; }
+
+#status { min-height: 20px; color: #ffd166; font-size: 13px; }
+
+.stage { text-align: center; }
+#poster {
+  max-width: 100%;
+  max-height: 76vh;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  touch-action: none;
+  cursor: grab;
+}
+#poster:active { cursor: grabbing; }
+#hint { color: #cdb8e8; font-size: 13px; }
+#lastExport h2 {
+  font-family: Anton, 'Arial Narrow', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 16px;
+  color: #00e5ff;
+}
+#exportPreview { max-width: 320px; border-radius: 6px; }
+
+/* Screenshot scenes: the cover alone, or the exported PNG alone, fills the frame. */
+body.shot-cover .controls,
+body.shot-cover #hint,
+body.shot-cover #lastExport,
+body.shot-exported .app { display: none; }
+body.shot-cover { background: #12081f; }
+body.shot-cover .app { display: block; max-width: none; padding: 0; }
+body.shot-cover .stage { max-width: none; }
+body.shot-cover #poster {
+  max-width: 100vw;
+  max-height: 100vh;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
+  display: block;
+  margin: 0 auto;
+}
+body.shot-exported { background: #12081f; margin: 0; }
+body.shot-exported #exportedShot { display: block; }
+#exportedShot { text-align: center; }
+#exportedImg { max-width: 100vw; max-height: 100vh; display: block; margin: 0 auto; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: 1fr; }
+}
